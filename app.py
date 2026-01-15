@@ -23,6 +23,7 @@ st.markdown("""
         border-radius: 5px;
         color: #155724;
         margin-top: 5px;
+        border: 1px solid #c3e6cb;
     }
     .incorrect {
         background-color: #f8d7da;
@@ -30,6 +31,7 @@ st.markdown("""
         border-radius: 5px;
         color: #721c24;
         margin-top: 5px;
+        border: 1px solid #f5c6cb;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -90,7 +92,8 @@ def obtener_banco_preguntas():
     banco.append(generar_pregunta("Aumento consumo al pasar de 90 a 100 km/h:", "5%", ["10%", "15%", "2%"], "ECO"))
     banco.append(generar_pregunta("Consumo nulo se logra:", "Más de 20km/h, marcha engranada, sin acelerar", ["En punto muerto", "Al ralentí", "Frenando fuerte"], "ECO"))
     banco.append(generar_pregunta("En bajadas se recomienda:", "Aprovechar inercia con marcha puesta", ["Poner punto muerto", "Apagar motor", "Pisar embrague"], "ECO"))
-    banco.append(generar_pregunta("Arranque motor diésel moderno:", "Esperar unos segundos sin acelerar", "Acelerar a fondo", "Bombear acelerador", "ECO"))
+    # ESTA ES LA LÍNEA QUE DABA ERROR (AHORA CORREGIDA):
+    banco.append(generar_pregunta("Arranque motor diésel moderno:", "Esperar unos segundos sin acelerar", ["Acelerar a fondo", "Bombear acelerador"], "ECO"))
 
     return banco
 
@@ -102,12 +105,8 @@ def crear_examen_nuevo():
     prl = [p for p in banco if p['tema'] == "PRL"]
     eco = [p for p in banco if p['tema'] == "ECO"]
     
-    # Seleccionar aleatoriamente (asegurando unicidad si hay suficientes)
-    # Nota: Aquí simulamos selección. En producción, expandir el banco para tener >20 PRL y >4 ECO únicas.
-    # Usamos random.choices si el banco es pequeño para permitir repetir, o sample si es grande.
-    # Dado el ejemplo pequeño arriba, usaremos choices para que no falle el código, 
-    # pero TU OBJETIVO es añadir más preguntas al banco.
-    
+    # Seleccionar aleatoriamente
+    # Usamos random.choices para rellenar si no hay suficientes preguntas únicas en el banco
     seleccion_prl = random.choices(prl, k=20) 
     seleccion_eco = random.choices(eco, k=4)
     
@@ -125,7 +124,6 @@ if 'corregido' not in st.session_state:
 
 # --- INTERFAZ BARRA LATERAL ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2933/2933116.png", width=100) # Icono genérico test
     st.title("Panel de Control")
     st.write("Genera test infinitos basados en el manual de Conductor de LIPASAM.")
     
@@ -161,7 +159,6 @@ else:
             st.markdown(f"**:{color_tag}[{p['tema']}] Pregunta {i+1}:** {p['pregunta']}")
             
             # Opciones (Radio button)
-            # Usamos una clave única para mantener la selección
             seleccion = st.radio(
                 "Selecciona una opción:", 
                 p['opciones'], 
